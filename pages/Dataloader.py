@@ -1,65 +1,12 @@
 import streamlit as st
 import pandas as pd
 import os
-from pathlib import Path
 import plotly.graph_objects as go
 
-def load_csv_files(folder_path):
-    """Load all CSV files from a given folder and its subdirectories."""
-    csv_files = list(Path(folder_path).rglob("*.csv"))
-    dataframes = {}
-    for file in csv_files:
-        try:
-            # Load CSV into a DataFrame
-            df = pd.read_csv(file)
-            # Store DataFrame in dictionary with filename as the key
-            dataframes[file.name] = df
-        except Exception as e:
-            st.error(f"Error loading {file.name}: {e}")
-    return dataframes
+from utils import auth_functions
+from utils.visualize_data import load_csv_files
 
-def plot_candlestick(df, title):
-    """Create a candlestick chart using Plotly."""
-    fig = go.Figure(
-        data=[
-            go.Candlestick(
-                x=df['time'],
-                open=df['open'],
-                high=df['high'],
-                low=df['low'],
-                close=df['close'],
-                name="Candlestick"
-            )
-        ]
-    )
-    fig.update_layout(
-        title=title,
-        xaxis_title="Time",
-        yaxis_title="Price",
-        xaxis_rangeslider_visible=False,
-        template="plotly_dark",
-    )
-    return fig
-
-def plot_line_chart(df, title):
-    """Create a line chart using Plotly."""
-    fig = go.Figure(
-        data=[
-            go.Scatter(
-                x=df['time'],
-                y=df['close'],
-                mode='lines',
-                name='Close Price'
-            )
-        ]
-    )
-    fig.update_layout(
-        title=title,
-        xaxis_title="Time",
-        yaxis_title="Price",
-        template="plotly_dark",
-    )
-    return fig
+auth_functions.check_authentication()
 
 # Dataloader page content
 st.title("Dataloader")

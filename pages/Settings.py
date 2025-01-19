@@ -2,6 +2,7 @@ import streamlit as st
 from utils.print_info import print_user_info
 from utils import auth_functions
 
+auth_functions.check_authentication()
 
 st.header('User Information')
 

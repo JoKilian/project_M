@@ -154,3 +154,11 @@ def delete_account(password:str) -> None:
 
     except Exception as error:
         print(error)
+
+
+
+def check_authentication():
+    """Redirect to the login page if the user is not authenticated."""
+    if 'user_info' not in st.session_state:
+        st.warning("You must be logged in to access this page.")
+        st.stop()  # Stops further execution of the page
