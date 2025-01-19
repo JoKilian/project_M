@@ -6,7 +6,7 @@ import plotly.graph_objects as go
 from utils import auth_functions
 from utils.visualize_data import load_csv_files
 
-auth_functions.check_authentication()
+# auth_functions.check_authentication()
 
 # Dataloader page content
 st.title("Dataloader")
