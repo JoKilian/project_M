@@ -1,32 +1,34 @@
 import streamlit as st
 import pandas as pd
-import os
 import plotly.graph_objects as go
-
+from io import StringIO
 from utils import auth_functions
-from utils.visualize_data import load_csv_files
 
-# auth_functions.check_authentication()
+auth_functions.check_authentication()
 
 # Dataloader page content
 st.title("Dataloader")
 st.header("Load and Visualize CSV Files")
 
-# Folder selection input
-folder_path = st.text_input("Enter the folder path containing CSV files:")
+# File uploader (allow multiple files)
+uploaded_files = st.file_uploader("Upload CSV files", type=["csv"], accept_multiple_files=True)
 
 # Placeholder for data storage
 if 'dataframes' not in st.session_state:
     st.session_state.dataframes = {}
 
-# Load and visualize data
-if st.button("Load CSV Files"):
-    if not folder_path or not os.path.isdir(folder_path):
-        st.error("Please enter a valid folder path.")
-    else:
-        # Load CSV files and store them in session state
-        st.session_state.dataframes = load_csv_files(folder_path)
-        st.success(f"Loaded {len(st.session_state.dataframes)} files.")
+# Load and store files if any are uploaded
+if uploaded_files:
+    # Load CSV files into session state
+    st.session_state.dataframes = {}
+    for uploaded_file in uploaded_files:
+        # Read file content and load into DataFrame
+        file_name = uploaded_file.name
+        file_content = uploaded_file.getvalue().decode("utf-8")
+        df = pd.read_csv(StringIO(file_content))
+        st.session_state.dataframes[file_name] = df
+    
+    st.success(f"Loaded {len(uploaded_files)} files.")
 
 # Visualization options
 if st.session_state.dataframes:

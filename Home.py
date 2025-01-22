@@ -1,64 +1,44 @@
 import streamlit as st
-from utils import auth_functions
 
-# List of allowed emails
-ALLOWED_EMAILS = ['jkilian.main@outlook.de', 'philipp.matzke@t-online.de']
+# Fetch credentials from st.secrets
+usernames = st.secrets['credentials']['usernames']
 
-def main():
-    if 'user_info' not in st.session_state:
-        col1, col2, col3 = st.columns([1, 2, 1])
+# Create a dictionary to map usernames to plain passwords
+user_passwords = {}
+for username, user_data in usernames.items():
+    user_passwords[username] = user_data['password']
 
-        # Authentication form layout
-        do_you_have_an_account = col2.selectbox(label='Do you have an account?', options=('Yes', 'No', 'I forgot my password'))
-        auth_form = col2.form(key='Authentication form', clear_on_submit=False)
-        email = auth_form.text_input(label='Email')
-        password = auth_form.text_input(label='Password', type='password') if do_you_have_an_account in {'Yes', 'No'} else auth_form.empty()
-        auth_notification = col2.empty()
+# Function to check login
+def login(username, password):
+    if username not in user_passwords:
+        return False
+    # Check if the entered password matches the stored plain password
+    return password == user_passwords[username]
 
-        # Sign In
-        if do_you_have_an_account == 'Yes' and auth_form.form_submit_button(label='Sign In', use_container_width=True, type='primary'):
-            with auth_notification, st.spinner('Signing in'):
-                auth_functions.sign_in(email, password)
+# Streamlit page logic
+if 'logged_in' not in st.session_state:
+    st.session_state['logged_in'] = False  # Track login status
 
-        # Create Account
-        elif do_you_have_an_account == 'No' and auth_form.form_submit_button(label='Create Account', use_container_width=True, type='primary'):
-            # Check if the email is allowed to create an account
-            if email not in ALLOWED_EMAILS:
-                auth_notification.warning('This email is not allowed to create an account.')
+# Handle login if user is not logged in
+if not st.session_state['logged_in']:
+    st.title("Login")
+    username_input = st.text_input("Username")
+    password_input = st.text_input("Password", type='password')
+
+    # Submit button
+    if st.button('Login'):
+        if username_input and password_input:
+            # Check the login credentials
+            if login(username_input, password_input):
+                st.session_state['logged_in'] = True  # Set login status to True
+                st.success(f"Welcome, {usernames[username_input]['name']}!")
+                st.rerun()  # Refresh the page to show the homepage
             else:
-                with auth_notification, st.spinner('Creating account'):
-                    auth_functions.create_account(email, password)
+                st.error("Invalid username or password.")
+        else:
+            st.warning("Please enter both username and password.")
 
-        # Password Reset
-        elif do_you_have_an_account == 'I forgot my password' and auth_form.form_submit_button(label='Send Password Reset Email', use_container_width=True, type='primary'):
-            with auth_notification, st.spinner('Sending password reset link'):
-                auth_functions.reset_password(email)
-
-        # Authentication success and warning messages
-        if 'auth_success' in st.session_state:
-            auth_notification.success(st.session_state.auth_success)
-            del st.session_state.auth_success
-        elif 'auth_warning' in st.session_state:
-            auth_notification.warning(st.session_state.auth_warning)
-            del st.session_state.auth_warning
-
-    # -------------------------------------------------------------------------------------------------
-    # Logged in --------------------------------------------------------------------------------------
-    # -------------------------------------------------------------------------------------------------
-    else:
-        # Sidebar customization for logout
-        st.title("Home")
-        st.header('Welcome to Project M')
-        st.write('Home page content goes here.')
-        with st.sidebar:
-            if st.button(label="Sign Out", key="logout"):
-                # Clear session state and rerun the app to reset the state
-                st.session_state.clear()  # Clear session data
-                st.experimental_rerun()  # Rerun the app to reset session state
-
-        # Streamlit automatically handles rendering the selected page
-        st.write("")  # Placeholder to ensure sidebar renders cleanly
-
-
-if __name__ == "__main__":
-    main()
+# Show homepage if logged in
+if st.session_state['logged_in']:
+    st.title("Home Page")
+    st.write("You are now logged in.")

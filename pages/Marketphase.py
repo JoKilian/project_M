@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+from utils import auth_functions
+
+auth_functions.check_authentication()
 
 # Check if session state contains dataframes
 if 'dataframes' not in st.session_state or not st.session_state.dataframes:
