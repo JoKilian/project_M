@@ -11,11 +11,7 @@ This is a Streamlit app with Firebase authentication. The app allows users to lo
 
 2. Run the app:
     ```bash
-    streamlit run app/app.py
+    streamlit run Home.py
     ```
 
-3. Create an Account with your Email (click the link to verify registration)
-
-## Usage
-
-The app will prompt you to log in using your Firebase credentials. After logging in, you will be redirected to the homepage.
+3. Login with Credentials
